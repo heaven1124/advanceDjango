@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Regist</title>
+</head>
+<body>
+    <script>
+        function up_ajax(){
+            data = {
+                name: document.forms[0].name.value,
+                phone: document.forms[0].phone.value
+            };
+
+            {#向当前网页地址发送Ajax请求#}
+            fetch('',{
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content_Type': 'application/json;charset=utf-8'
+                }
+            }).then(response => response.text())
+            .then(text => {
+                document.write(text);
+            })
+        }
+    </script>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input name="name" placeholder="username"><br>
+        <input name="phone" placeholder="phone"><br>
+        <input name="password" type="password" placeholder="password"><br>
+        <input type="date" placeholder="birthday"><br>
+        <button>submit</button>
+    </form>
+    <p>
+        <button onclick="up_ajax()">ajax upload json data</button>
+    </p>
+    <p>
+        requested path: {{ request.path }}<br>
+        requested full path: {{ request.get_full_path }}
+    </p>
+    <p>
+        requested method: {{ request.method }}<br>
+        content_type: {{ request.content_type }}<br>
+        encoding: {{ request.encoding }}<br>
+        content_params: {{ request.content_params }}
+    </p>
+    <p>
+        body: {{ request.body }}
+    </p>
+</body>
+</html>

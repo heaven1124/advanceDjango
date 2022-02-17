@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查询列表</title>
+</head>
+<body>
+<form>
+    <input name="wd" placeholder="名称或价格">
+    <button>搜索</button>
+</form>
+<h3>订单查询结构</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+    <thead>
+        <th>ID</th>
+        <th>名称</th>
+        <th>单价</th>
+        <th>支付状态</th>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.num }}</td>
+                <td>{{ order.title }}</td>
+                <td>{{ order.price }}</td>
+                <td>{{ order.pay_status }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="">查无此数据</td>
+            </tr>
+        {% endfor %}
+        
+    </tbody>
+</table>
+</body>
+</html>

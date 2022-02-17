@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Regist3</title>
+</head>
+<body>
+    <form method="post" enctype="application/x-www-form-urlencoded" >
+        <input name="name" placeholder="username"><br>
+        <input name="phone" placeholder="phone"><br>
+        <br>
+        <button>submit</button>
+    </form>
+    <p>
+            <button onclick="st_ajax()">Ajax发起put请求</button>
+            <script>
+                function st_ajax() {
+                    data = {
+                        name: document.forms[0].name.value,
+                        phone: document.forms[0].phone.value
+                    };
+                    let formdata = new FormData();
+                    formdata.append('name', data.name)
+                    formdata.append('phone', data.phone)
+
+                    fetch('', {
+                        method: 'PUT',
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        }
+                    }).then(response => response.text())
+                    .then(html => document.write(html))
+                }
+            </script>
+    </p>
+    <p>
+        post requested params:
+        <ul>
+            {% for key, value in request.POST.items %}
+                <li>{{ key }}: {{ value }}</li>
+            {% endfor %}
+        </ul>
+    </p>
+    <p>
+        put requested params: {{ request.body }}<br>
+        Content-Type: {{ request.content_type }};{{ request.encoding }}
+
+    </p>
+</body>
+</html>
