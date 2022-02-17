@@ -2,6 +2,8 @@ import json
 import random
 import uuid
 
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
@@ -175,5 +177,11 @@ def new_img_code(request):
 
 
 def order_list(request):
-    orders = Order.objects.all()
+    wd = request.GET.get('wd', '')
+    page = request.GET.get('page', 1)
+    orders = Order.objects.filter(Q(title__icontains=wd)).all() # 忽略大小写
+    # 分页器
+    paginator = Paginator(orders, 5)
+    # 查询第page页
+    pager = paginator.page(page)
     return render(request, 'list.html', locals())
