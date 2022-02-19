@@ -1,7 +1,7 @@
 import json
 import random
 import uuid
-
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
@@ -10,6 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
+from common import code
 from common.code import new_code_str
 
 # Create your views here.
@@ -108,12 +109,16 @@ def del_cookie(request):
 def login(request):
     phone = request.GET.get('phone')
     code = request.GET.get('code')
-    if all((
-        phone == request.session.get('phone'),
-        code == request.session.get('code')
-    )):
+    # if all((
+    #     phone == request.session.get('phone'),
+    #     code == request.session.get('code')
+    # )):
+    if all((cache.has_key(phone),
+            cache.get(phone) == code)):
         resp = HttpResponse('login success')
         resp.set_cookie('token', uuid.uuid4().hex)
+        # 登陆成功，删除缓存
+        cache.delete(phone)
         return resp
 
     return HttpResponse('fail login')
@@ -129,19 +134,19 @@ def logout(request):
 
 def list(request):
     # 验证是否登陆
-    if request.COOKIES.get('token'):
-        return HttpResponse('正在调转到主页')
     return HttpResponse('请先登陆')
 
 
 def new_code(request):
     # 生成手机验证码 随机产生：大小写字母+数字
-    code_txt = 'Xab9'
+    code_txt = code.new_code_str(4)
+    print(code_txt)
     phone = request.GET.get('phone')
     # 保存到session中 向手机发送验证码
     request.session['code'] = code_txt
     request.session['phone'] = phone
-
+    # 将验证码存到cache中
+    cache.set(phone, code_txt, timeout=60)
     return HttpResponse('成功发送验证码')
 
 

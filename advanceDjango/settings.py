@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
+    'stockapp',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.check_login.CheckLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'advanceDjango.urls'
@@ -129,3 +131,64 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 配置Django的日志
+LOGGING = {
+    'version': 1.0,
+    'formatters': {
+        'base': {
+            'format': '[%(asctime)s %(name)s] %(message)s',
+            'datefmt': '%Y/%m/%d %H:%M:%S'
+        }
+    },
+    'handlers': {
+        # 日志输出到控制台
+        'out': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'base'
+        },
+        # 日志输出到文件
+        'file': {
+            'class': 'logging.FileHandler',
+            'level': 'WARNING',
+            'formatter': 'base',
+            'filename': f'{BASE_DIR}/warn.log'
+        },
+        # 日志发送到指定邮箱
+        # 'email': {
+        #
+        # }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['out', 'file'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+}
+
+# 配置缓存Cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': f'{BASE_DIR}/mycache',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 500,
+            'CULL_FREQUENCY': 3,
+        }
+    },
+    # 'database': {
+    #     'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+    #     'LOCATION': 'my_cache_table',
+    #     'TIMEOUT': 60,
+    #     'KEY_PREFIX': 'bbs',
+    #     'VERSION': '1',
+    #     'OPTIONS': {
+    #         'MAX_ENTRIES': 500,
+    #         'CULL_FREQUENCY': 3,
+    #     }
+    # }
+}
