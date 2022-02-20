@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'stockapp',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'middleware.check_login.CheckLoginMiddleware',
+    'middleware.cache_page.CachePageMiddleware',
 ]
 
 ROOT_URLCONF = 'advanceDjango.urls'
@@ -171,11 +173,28 @@ LOGGING = {
 
 # 配置缓存Cache
 CACHES = {
-    'default': {
+    'file': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': f'{BASE_DIR}/mycache',
         'TIMEOUT': 300,
         'OPTIONS': {
+            'MAX_ENTRIES': 500,
+            'CULL_FREQUENCY': 3,
+        }
+    },
+    'html': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    },
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://10.0.0.48:6379/10',
+        'OPTIONS': {
+            'PASSWORD': '123',
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 10,
+            'SOCKET_TIMEOUT': 10,
+
             'MAX_ENTRIES': 500,
             'CULL_FREQUENCY': 3,
         }
@@ -192,3 +211,15 @@ CACHES = {
     #     }
     # }
 }
+
+# 配置session
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_COOKIE_NAME = 'SESSION_ID'
+SESSION_COOKIE_PATH = '/'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 1209600 # 有效时间两周
+
+# 配置celery
+CELERY_IMPORTS = ('stockapp.tasks',)
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'

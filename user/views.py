@@ -1,15 +1,18 @@
 import json
 import random
+import string
 import uuid
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
+import signals
 from common import code
 from common.code import new_code_str
 
@@ -132,9 +135,14 @@ def logout(request):
     return resp
 
 
+# @cache_page(timeout=10,
+            # cache='html',
+            # key_prefix='page')
 def list(request):
-    # 验证是否登陆
-    return HttpResponse('请先登陆')
+    # 所有字母
+    chrs = string.ascii_letters
+    char = random.choice(chrs)
+    return HttpResponse('用户列表页面: <br> %s' % char)
 
 
 def new_code(request):
@@ -142,11 +150,21 @@ def new_code(request):
     code_txt = code.new_code_str(4)
     print(code_txt)
     phone = request.GET.get('phone')
+
+    # 发送信号
+    # sender可以根据需求设定
+    # 关键参数列表，根据信号定义的参数列表传值
+    signals.codeSignal.send('new_code',
+                            path=request.path,
+                            phone=phone,
+                            code=code_txt)
+
     # 保存到session中 向手机发送验证码
     request.session['code'] = code_txt
     request.session['phone'] = phone
+
     # 将验证码存到cache中
-    cache.set(phone, code_txt, timeout=60)
+    cache.set(phone, code_txt, timeout=300)
     return HttpResponse('成功发送验证码')
 
 
